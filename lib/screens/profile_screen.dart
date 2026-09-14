@@ -149,7 +149,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   // ── Lista de posts do usuário ────────────────────────
                   Expanded(
                     child: RefreshIndicator(
-                      onRefresh: _fetchData,
+                      onRefresh: _loadProfileData,
                       child: _userPosts.isEmpty
                           ? ListView(
                               physics: const AlwaysScrollableScrollPhysics(),
