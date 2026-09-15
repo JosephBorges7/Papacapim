@@ -159,10 +159,12 @@ class ApiService {
       url,
       headers: _headers(requiresAuth: false),
       body: jsonEncode({
-        'name': name,
-        'login': login,
-        'password': password,
-        'password_confirmation': passwordConfirmation,
+        'user': {
+          'name': name,
+          'login': login,
+          'password': password,
+          'password_confirmation': passwordConfirmation,
+        }
       }),
     );
 
@@ -212,7 +214,8 @@ class ApiService {
   /// Exclui permanentemente a conta do usuário logado (DELETE /users/me).
   Future<void> deleteAccount() async {
     final url = Uri.parse('$baseUrl/users/me');
-    await http.delete(url, headers: _headers());
+    final response = await http.delete(url, headers: _headers());
+    _handleResponse(response); // lança ApiException se o servidor recusar
     sessionToken = null;
     currentLogin = null;
   }
