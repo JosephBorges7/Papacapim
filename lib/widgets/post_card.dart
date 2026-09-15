@@ -6,6 +6,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:convert';
 import '../models/post.dart';
 import '../models/user.dart';
 import '../providers/app_state.dart';
@@ -145,6 +146,32 @@ class PostCard extends StatelessWidget {
               post.content,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
+
+            Builder(builder: (context) {
+              final apiImg = post.apiImageUrl;
+              final localImg = appState.postImages[post.id];
+
+              if (apiImg != null && apiImg.startsWith('http')) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(apiImg, width: double.infinity, fit: BoxFit.cover),
+                  ),
+                );
+              }
+              final b64 = apiImg ?? localImg;
+              if (b64 != null) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.memory(base64Decode(b64), width: double.infinity, fit: BoxFit.cover),
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            }),
 
             const SizedBox(height: 12),
 

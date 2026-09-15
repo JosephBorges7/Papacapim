@@ -181,14 +181,14 @@ class ApiService {
     return _handleResponse(response) as Map<String, dynamic>;
   }
 
-  /// Altera os dados do usuário logado (PATCH /users/1).
+  /// Altera os dados do usuário logado (PATCH /users/me).
   Future<Map<String, dynamic>> updateUser({
     String? name,
     String? password,
     String? passwordConfirmation,
     String? imageDataBase64,
   }) async {
-    final url = Uri.parse('$baseUrl/users/1');
+    final url = Uri.parse('$baseUrl/users/me');
     final userMap = <String, dynamic>{};
 
     if (name != null && name.isNotEmpty) userMap['name'] = name;
@@ -197,7 +197,7 @@ class ApiService {
       userMap['password_confirmation'] = passwordConfirmation ?? password;
     }
     if (imageDataBase64 != null && imageDataBase64.isNotEmpty) {
-      userMap['profile_image'] = imageDataBase64;
+      userMap['image_data'] = imageDataBase64;
     }
 
     final response = await http.patch(
@@ -297,14 +297,21 @@ class ApiService {
   }
 
   /// Cria uma nova postagem (POST /posts).
-  Future<Map<String, dynamic>> createPost(String message) async {
+  Future<Map<String, dynamic>> createPost(String message, {String? base64Image}) async {
     final url = Uri.parse('$baseUrl/posts');
+    final body = <String, dynamic>{'message': message};
+
+    // Campo oficial da API para anexar imagens a uma postagem (POST /posts).
+    if (base64Image != null && base64Image.isNotEmpty) {
+      body['media'] = [
+        {'medium_type': 'image', 'medium_data': base64Image}
+      ];
+    }
+
     final response = await http.post(
       url,
       headers: _headers(),
-      body: jsonEncode({
-        'post': {'message': message}
-      }),
+      body: jsonEncode(body),
     );
     return _handleResponse(response) as Map<String, dynamic>;
   }

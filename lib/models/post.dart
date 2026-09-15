@@ -33,6 +33,8 @@ class Post {
   // Dados do autor do post (quando aninhados pela API).
   User? author;
 
+  final String? apiImageUrl;
+
   // ── Construtor ──────────────────────────────────────────────
   Post({
     required this.id,
@@ -44,6 +46,7 @@ class Post {
     this.repliesCount = 0,
     this.youLiked = false,
     this.author,
+    this.apiImageUrl,
   });
 
   // ── Construtor a partir do JSON da API Papacapim ────────────
@@ -71,7 +74,20 @@ class Post {
       repliesCount: (json['replies_number'] as num?)?.toInt() ?? 0,
       youLiked: json['you_liked'] == true,
       author: parsedAuthor,
+      apiImageUrl: _extractMediaUrl(json['media']),
     );
+  }
+
+  static String? _extractMediaUrl(dynamic media) {
+    if (media is List && media.isNotEmpty) {
+      final first = media.first;
+      if (first is Map) {
+        return first['url']?.toString() ??
+            first['medium_data']?.toString() ??
+            first['medium_url']?.toString();
+      }
+    }
+    return null;
   }
 
   // ── Conversão do modelo para JSON ───────────────────────────

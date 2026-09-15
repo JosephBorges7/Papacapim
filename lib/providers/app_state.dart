@@ -30,6 +30,9 @@ class AppState extends ChangeNotifier {
   // Cache local de usuários por login para acesso rápido
   final Map<String, User> _userCache = {};
 
+  // Imagens anexadas às postagens (id do post -> imagem em Base64).
+  final Map<String, String> postImages = {};
+
   // Estado de carregamento do feed
   bool isLoadingFeeds = false;
 
@@ -166,16 +169,24 @@ class AppState extends ChangeNotifier {
 
   // ── Criar post ou resposta ────────────────────────────────────
   // Envia POST /posts ou POST /posts/{id}/replies para o back-end.
-  Future<bool> createPost(String content, {String? parentPostId}) async {
+  Future<bool> createPost(String content, {String? parentPostId, String? base64Image}) async {
     if (currentUser == null) return false;
 
     try {
+      Map<String, dynamic> created;
+
       if (parentPostId != null && parentPostId.isNotEmpty) {
-        // É uma resposta a um post existente
-        await _api.replyPost(parentPostId, content);
+        created = await _api.replyPost(parentPostId, content);
       } else {
-        // É uma postagem nova padrão
-        await _api.createPost(content);
+        // Envia pelo campo oficial "media" da API (POST /posts).
+        created = await _api.createPost(content, base64Image: base64Image);
+      }
+      
+      if (base64Image != null && base64Image.isNotEmpty) {
+        final newId = created['id']?.toString();
+        if (newId != null && newId.isNotEmpty) {
+          postImages[newId] = base64Image;
+        }
       }
 
       // Recarrega os feeds para refletir a nova postagem no topo
