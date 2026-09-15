@@ -34,7 +34,7 @@
    ```
 5. Rode o aplicativo (escolha um emulador, dispositivo físico ou web):
    ```bash
-   flutter run
+   flutter run -d chrome --web-browser-flag "--disable-web-security"
    ```
 
 ---
